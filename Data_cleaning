@@ -157,3 +157,8 @@ WHERE pickup_time = 'null'
 UPDATE runner_orders
 SET duration = SUBSTRING(duration,1,2)
 WHERE duration LIKE '%min%'
+
+UPDATE pizza_runner..runner_orders
+SET distance = TRIM('km' FROM distance)
+WHERE distance LIKE '%km%'
+
