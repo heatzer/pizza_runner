@@ -130,6 +130,69 @@ WHERE runner_orders.cancellation = ''
 GROUP BY customer_orders.customer_id
 
 
---How many pizzas were delivered that had both exclusions and extras?
---What was the total volume of pizzas ordered for each hour of the day?
---What was the volume of orders for each day of the week?
+--8. How many pizzas were delivered that had both exclusions and extras?
+
+Answer: 
+had_both_change
+1
+
+SELECT 
+	SUM(CASE
+		WHEN exclusions <> '' AND extras <> '' THEN 1
+		ELSE 0
+		END) AS had_both_change
+FROM pizza_runner..customer_orders 
+JOIN pizza_runner..runner_orders
+ON customer_orders.order_id = runner_orders.order_id
+WHERE runner_orders.cancellation = ''
+
+
+--9. What was the total volume of pizzas ordered for each hour of the day?
+
+Answer:
+hours_of_the_day total_volume
+			13		3
+			18		3
+			19		1
+			21		2
+			23		3	
+
+WITH CTE AS (
+	SELECT CASE DATEPART(dayofyear, order_time) AS day_of_the_week
+	FROM pizza_runner..customer_orders 
+	JOIN pizza_runner..runner_orders
+	ON customer_orders.order_id = runner_orders.order_id
+	WHERE runner_orders.cancellation = ''
+)
+SELECT day_of_the_week, COUNT(*) total_volume
+FROM CTE
+GROUP BY day_of_the_week
+
+
+--10. What was the volume of orders for each day of the week?
+
+Answer:
+day_of_week	total_volume
+Saturday	5
+Thursday	3
+Wednesday	4
+
+WITH CTE AS (
+	SELECT CASE DATEPART(dw, order_time)
+		WHEN 1 THEN 'Sunday'
+		WHEN 2 THEN 'Monday'
+		WHEN 3 THEN 'Tuesday'
+		WHEN 4 THEN 'Wednesday'
+		WHEN 5 THEN 'Thursday'
+		WHEN 6 THEN 'Friday'
+		ELSE 'Saturday' 
+		END AS day_of_week, 
+	order_time
+	FROM pizza_runner..customer_orders 
+	JOIN pizza_runner..runner_orders
+	ON customer_orders.order_id = runner_orders.order_id
+	WHERE runner_orders.cancellation = ''
+)
+SELECT day_of_week, COUNT(*) total_volume
+FROM CTE
+GROUP BY day_of_week
